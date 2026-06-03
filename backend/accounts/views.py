@@ -13,6 +13,8 @@ from .serializers import (
     LoginSerializer,
     ProfileSerializer
 )
+
+from .permissions import IsHRAdmin
 # Create your views here.
 class LoginView(APIView):
 
@@ -71,5 +73,18 @@ class ProfileView(APIView):
 
         return Response(
             serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+class HRDashboardView(APIView):
+
+    permission_classes = [IsHRAdmin]
+
+    def get(self, request):
+
+        return Response(
+            {
+                'message': 'Welcome HR Admin'
+            },
             status=status.HTTP_200_OK
         )
