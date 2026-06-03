@@ -3,7 +3,9 @@ from .views import (
     LoginView,
     ProfileView,
     HRDashboardView,
-    EmployeeCreateView
+    EmployeeCreateView,
+    DeactivateEmployeeView,
+    ReactivateEmployeeView
 )
 
 urlpatterns = [
@@ -29,5 +31,17 @@ urlpatterns = [
         'employees/',
         EmployeeCreateView.as_view(),
         name='employee-create'
+    ),
+
+    path(
+        'employees/<int:user_id>/deactivate/',
+        DeactivateEmployeeView.as_view(),
+        name='employee-deactivate'
+    ),
+
+    path(
+        'employees/<int:user_id>/reactivate/',
+        ReactivateEmployeeView.as_view(),
+        name='employee-reactivate'
     ),
 ]

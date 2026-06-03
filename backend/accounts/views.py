@@ -16,6 +16,7 @@ from .serializers import (
 )
 
 from .permissions import IsHRAdmin
+from .models import User
 # Create your views here.
 class LoginView(APIView):
 
@@ -114,4 +115,77 @@ class EmployeeCreateView(APIView):
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
+        )    
+    
+class DeactivateEmployeeView(APIView):
+
+    permission_classes = [IsHRAdmin]
+
+    def patch(self, request, user_id):
+
+        try:
+
+            user = User.objects.get(
+                id=user_id
+            )
+
+        except User.DoesNotExist:
+
+            return Response(
+                {
+                    'error': 'User not found'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user.is_active = False
+
+        user.save()
+
+        return Response(
+            {
+                'message': 'Employee deactivated successfully'
+            },
+            status=status.HTTP_200_OK
+        )    
+    
+class ReactivateEmployeeView(APIView):
+
+    permission_classes = [IsHRAdmin]
+
+    def patch(self, request, user_id):
+
+        try:
+
+            user = User.objects.get(
+                id=user_id
+            )
+
+        except User.DoesNotExist:
+
+            return Response(
+                {
+                    'error': 'User not found'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if user.is_active:
+
+            return Response(
+                {
+                    'error': 'Employee is already active'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.is_active = True
+
+        user.save()
+
+        return Response(
+            {
+                'message': 'Employee reactivated successfully'
+            },
+            status=status.HTTP_200_OK
         )    
