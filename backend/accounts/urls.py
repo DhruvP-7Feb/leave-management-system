@@ -1,14 +1,9 @@
 from django.urls import path
-
-""" from .views import (
-    LoginView,
-    ProfileView
-)
- """
 from .views import (
     LoginView,
     ProfileView,
     HRDashboardView,
+    EmployeeCreateView
 )
 
 urlpatterns = [
@@ -28,5 +23,11 @@ urlpatterns = [
         'hr-dashboard/',
         HRDashboardView.as_view(),
         name='hr-dashboard'
+    ),
+
+    path(
+        'employees/',
+        EmployeeCreateView.as_view(),
+        name='employee-create'
     ),
 ]

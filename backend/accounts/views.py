@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from .serializers import (
     LoginSerializer,
-    ProfileSerializer
+    ProfileSerializer,
+    EmployeeCreateSerializer
 )
 
 from .permissions import IsHRAdmin
@@ -88,3 +89,29 @@ class HRDashboardView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+class EmployeeCreateView(APIView):
+
+    permission_classes = [IsHRAdmin]
+
+    def post(self, request):
+
+        serializer = EmployeeCreateSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                {
+                    'message': 'Employee created successfully'
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )    

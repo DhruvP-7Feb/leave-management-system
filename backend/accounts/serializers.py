@@ -30,3 +30,35 @@ class ProfileSerializer(serializers.ModelSerializer):
             'department',
             'joining_date'
         ]
+
+class EmployeeCreateSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(
+        write_only=True
+    )
+
+    class Meta:
+
+        model = User
+
+        fields = [
+            'username',
+            'password',
+            'email',
+            'name',
+            'role',
+            'department',
+            'joining_date'
+        ]
+
+    def create(self, validated_data):
+
+        return User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            email=validated_data['email'],
+            name=validated_data['name'],
+            role=validated_data['role'],
+            department=validated_data.get('department'),
+            joining_date=validated_data.get('joining_date')
+        )        
