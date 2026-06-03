@@ -59,47 +59,11 @@ class LoginView(APIView):
             status=status.HTTP_200_OK
         )
     
-""" class ProfileView(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-
-        serializer = ProfileSerializer(
-            request.user
-        )
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
- """
-
-""" class ProfileView(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-
-        print("HEADERS:", request.headers)
-
-        serializer = ProfileSerializer(
-            request.user
-        )
-
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        ) """
-
 class ProfileView(APIView):
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
-        print("USER:", request.user)
-        print("HEADERS:", request.headers)
 
         serializer = ProfileSerializer(
             request.user
