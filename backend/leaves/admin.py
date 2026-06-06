@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+# Register your models here.python manage.py runserver
 from .models import LeaveType, LeaveBalance
 
 

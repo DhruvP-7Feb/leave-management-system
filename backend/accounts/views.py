@@ -17,6 +17,8 @@ from .serializers import (
 
 from .permissions import IsHRAdmin
 from .models import User
+from leaves.models import LeaveType, LeaveBalance
+import math
 # Create your views here.
 class LoginView(APIView):
 
@@ -103,8 +105,23 @@ class EmployeeCreateView(APIView):
 
         if serializer.is_valid():
 
-            serializer.save()
+            employee = serializer.save()
+            joining_month = employee.joining_date.month
 
+            remaining_months = 12 - joining_month + 1
+
+            leave_types = LeaveType.objects.all()
+            for leave_type in leave_types:
+
+                prorated_days = math.ceil(
+                    leave_type.annual_quota * remaining_months / 12
+                )
+
+                LeaveBalance.objects.create(
+                    employee=employee,
+                    leave_type=leave_type,
+                    total_days=prorated_days
+                )
             return Response(
                 {
                     'message': 'Employee created successfully'
