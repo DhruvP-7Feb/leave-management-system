@@ -29,4 +29,9 @@ urlpatterns = [
         'api/departments/',
         include('departments.urls')
     ),
+
+    path(
+        'api/leaves/',
+        include('leaves.urls')
+    ),
 ]
