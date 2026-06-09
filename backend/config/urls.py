@@ -34,4 +34,9 @@ urlpatterns = [
         'api/leaves/',
         include('leaves.urls')
     ),
+
+    path(
+        'api/leaves/',
+        include('leaves.urls')
+    ),
 ]

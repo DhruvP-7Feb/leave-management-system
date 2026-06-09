@@ -1,8 +1,11 @@
-from django.contrib import admin
-
 # Register your models here.python manage.py runserver
-from .models import LeaveType, LeaveBalance
-
+from django.contrib import admin
+from .models import (
+    LeaveType,
+    LeaveBalance,
+    LeaveRequest
+)
 
 admin.site.register(LeaveType)
 admin.site.register(LeaveBalance)
+admin.site.register(LeaveRequest)
