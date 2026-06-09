@@ -289,18 +289,22 @@ class ApproveLeaveView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if (
-            request.user.role == 'manager'
-            and
-            leave_request.employee.department != request.user.department
-        ):
+        if request.user.role == 'manager':
 
-            return Response(
-                {
-                    'error': 'You can approve only your department employees.'
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
+            employee_department = leave_request.employee.department
+
+            if (
+                employee_department is None
+                or
+                employee_department.manager != request.user
+            ):
+
+                return Response(
+                    {
+                        'error': 'You can approve only employees from departments you manage.'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
         leave_balance = LeaveBalance.objects.get(
             employee=leave_request.employee,
@@ -367,18 +371,22 @@ class RejectLeaveView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if (
-            request.user.role == 'manager'
-            and
-            leave_request.employee.department != request.user.department
-        ):
+        if request.user.role == 'manager':
 
-            return Response(
-                {
-                    'error': 'You can reject only your department employees.'
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
+            employee_department = leave_request.employee.department
+
+            if (
+                employee_department is None
+                or
+                employee_department.manager != request.user
+            ):
+
+                return Response(
+                    {
+                        'error': 'You can reject only employees from departments you manage.'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
         leave_request.status = 'rejected'
 
@@ -396,4 +404,4 @@ class RejectLeaveView(APIView):
             {
                 'message': 'Leave rejected successfully.'
             }
-        )    
+        )
