@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import IsHRAdmin
 from rest_framework import status
 from .models import (
     LeaveRequest,
@@ -16,8 +17,8 @@ from .serializers import (
 )
 from .utils import calculate_working_days
 from django.db.models import Q
+from datetime import timedelta
 from django.utils import timezone
-
 class LeaveBalanceView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -36,7 +37,6 @@ class LeaveBalanceView(APIView):
         return Response(
             serializer.data
         )
-
 
 class ApplyLeaveView(APIView):
 
@@ -68,10 +68,21 @@ class ApplyLeaveView(APIView):
 
                 total_days = 0.5
 
-            leave_balance = LeaveBalance.objects.get(
-                employee=request.user,
-                leave_type=leave_type
-            )
+            try:
+
+                leave_balance = LeaveBalance.objects.get(
+                    employee=request.user,
+                    leave_type=leave_type
+                )
+
+            except LeaveBalance.DoesNotExist:
+
+                return Response(
+                    {
+                        "error": "Leave balance record not found. Contact HR."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             if leave_balance.remaining_days < total_days:
 
@@ -125,7 +136,6 @@ class ApplyLeaveView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-
 
 class MyLeavesView(APIView):
 
@@ -405,3 +415,37 @@ class RejectLeaveView(APIView):
                 'message': 'Leave rejected successfully.'
             }
         )
+    
+class HRDashboardView(APIView):
+
+    permission_classes = [IsAuthenticated, IsHRAdmin]
+
+    def get(self, request):
+
+        today = timezone.now().date()
+
+        first_day_of_month = today.replace(day=1)
+
+        total_leaves_this_month = LeaveRequest.objects.filter(
+            created_at__date__gte=first_day_of_month
+        ).count()
+
+        pending_approvals = LeaveRequest.objects.filter(
+            status='pending'
+        ).count()
+
+        end_of_week = today + timedelta(days=7)
+
+        upcoming_leaves_this_week = LeaveRequest.objects.filter(
+            start_date__gte=today,
+            start_date__lte=end_of_week,
+            status='approved'
+        ).count()
+
+        return Response(
+            {
+                'total_leaves_this_month': total_leaves_this_month,
+                'pending_approvals': pending_approvals,
+                'upcoming_leaves_this_week': upcoming_leaves_this_week
+            }
+        )    

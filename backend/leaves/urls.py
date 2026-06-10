@@ -7,7 +7,8 @@ from .views import (
     CancelLeaveView,
     ManagerPendingLeavesView,
     ApproveLeaveView,
-    RejectLeaveView
+    RejectLeaveView,
+    HRDashboardView
 )
 urlpatterns = [
     path(
@@ -50,5 +51,11 @@ urlpatterns = [
         '<int:leave_id>/reject/',
         RejectLeaveView.as_view(),
         name='reject-leave'
+    ),
+
+    path(
+        'hr/dashboard/',
+        HRDashboardView.as_view(),
+        name='hr-dashboard'
     ),
 ]
