@@ -142,7 +142,12 @@ class LeaveRequest(models.Model):
     )
 
     def __str__(self):
-        return f"{self.employee.name} - {self.leave_type.name}"    
+        return (
+            f"#{self.id} | "
+            f"{self.employee.name} | "
+            f"{self.leave_type.name} | "
+            f"{self.status}"
+        )    
     
 class PublicHoliday(models.Model):
 
