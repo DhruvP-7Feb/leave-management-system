@@ -1,4 +1,6 @@
 from django.shortcuts import render
+import csv
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -13,7 +15,9 @@ from .serializers import (
     LeaveRequestSerializer,
     LeaveRequestListSerializer,
     ManagerLeaveRequestSerializer,
-    RejectLeaveSerializer
+    RejectLeaveSerializer,
+    HRLeaveRequestSerializer,
+    HRLeaveBalanceSerializer
 )
 from .utils import calculate_working_days
 from django.db.models import Q
@@ -434,18 +438,165 @@ class HRDashboardView(APIView):
             status='pending'
         ).count()
 
-        end_of_week = today + timedelta(days=7)
-
-        upcoming_leaves_this_week = LeaveRequest.objects.filter(
+        upcoming_leaves = LeaveRequest.objects.filter(
+            status='approved',
             start_date__gte=today,
-            start_date__lte=end_of_week,
-            status='approved'
+            start_date__lte=today + timedelta(days=7)
         ).count()
 
         return Response(
             {
-                'total_leaves_this_month': total_leaves_this_month,
-                'pending_approvals': pending_approvals,
-                'upcoming_leaves_this_week': upcoming_leaves_this_week
+                "total_leaves_this_month": total_leaves_this_month,
+                "pending_approvals": pending_approvals,
+                "upcoming_leaves_this_week": upcoming_leaves
             }
+        )
+
+class HRLeaveReportView(APIView):
+
+    permission_classes = [IsAuthenticated, IsHRAdmin]
+
+    def get(self, request):
+
+        leave_requests = LeaveRequest.objects.all().order_by(
+            '-created_at'
+        )
+
+        serializer = HRLeaveRequestSerializer(
+            leave_requests,
+            many=True
+        )
+
+        return Response(
+            serializer.data
         )    
+    
+class HRLeaveReportView(APIView):
+
+    permission_classes = [IsAuthenticated, IsHRAdmin]
+
+    def get(self, request):
+
+        leave_requests = LeaveRequest.objects.all()
+
+        employee = request.GET.get('employee')
+
+        department = request.GET.get('department')
+
+        status_filter = request.GET.get('status')
+
+        start_date = request.GET.get('start_date')
+
+        end_date = request.GET.get('end_date')
+
+        if employee:
+
+            leave_requests = leave_requests.filter(
+                employee__name__icontains=employee
+            )
+
+        if department:
+
+            leave_requests = leave_requests.filter(
+                employee__department__name__icontains=department
+            )
+
+        if status_filter:
+
+            leave_requests = leave_requests.filter(
+                status=status_filter
+            )
+
+        if start_date:
+
+            leave_requests = leave_requests.filter(
+                start_date__gte=start_date
+            )
+
+        if end_date:
+
+            leave_requests = leave_requests.filter(
+                end_date__lte=end_date
+            )
+
+        leave_requests = leave_requests.order_by(
+            '-created_at'
+        )
+
+        serializer = HRLeaveRequestSerializer(
+            leave_requests,
+            many=True
+        )
+
+        return Response(
+            serializer.data
+        )
+
+class HRLeaveBalanceReportView(APIView):
+
+    permission_classes = [IsAuthenticated, IsHRAdmin]
+
+    def get(self, request):
+
+        balances = LeaveBalance.objects.select_related(
+            'employee',
+            'employee__department',
+            'leave_type'
+        )
+
+        serializer = HRLeaveBalanceSerializer(
+            balances,
+            many=True
+        )
+
+        return Response(
+            serializer.data
+        )        
+    
+class ExportLeaveReportCSVView(APIView):
+
+    permission_classes = [IsAuthenticated, IsHRAdmin]
+
+    def get(self, request):
+
+        response = HttpResponse(
+            content_type='text/csv'
+        )
+
+        response[
+            'Content-Disposition'
+        ] = 'attachment; filename="leave_report.csv"'
+
+        writer = csv.writer(response)
+
+        writer.writerow([
+            'Employee',
+            'Department',
+            'Leave Type',
+            'Start Date',
+            'End Date',
+            'Total Days',
+            'Status',
+            'Approved By',
+            'Created At'
+        ])
+
+        leave_requests = LeaveRequest.objects.all()
+
+        for leave in leave_requests:
+
+            writer.writerow([
+                leave.employee.name,
+                leave.employee.department.name,
+                leave.leave_type.name,
+                leave.start_date,
+                leave.end_date,
+                leave.total_days,
+                leave.status,
+                leave.approved_by.name
+                if leave.approved_by
+                else '',
+                leave.created_at
+            ])
+
+        return response    

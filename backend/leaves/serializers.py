@@ -140,3 +140,80 @@ class RejectLeaveSerializer(serializers.Serializer):
     rejection_reason = serializers.CharField(
         required=True
     )
+
+class HRLeaveRequestSerializer(serializers.ModelSerializer):
+
+    employee_name = serializers.CharField(
+        source='employee.name',
+        read_only=True
+    )
+
+    department = serializers.CharField(
+        source='employee.department.name',
+        read_only=True
+    )
+
+    leave_type = serializers.CharField(
+        source='leave_type.name',
+        read_only=True
+    )
+
+    approved_by = serializers.CharField(
+        source='approved_by.name',
+        read_only=True
+    )
+
+    class Meta:
+
+        model = LeaveRequest
+
+        fields = [
+            'id',
+            'employee_name',
+            'department',
+            'leave_type',
+            'start_date',
+            'end_date',
+            'total_days',
+            'status',
+            'approved_by',
+            'rejection_reason',
+            'created_at'
+        ]
+
+class HRLeaveBalanceSerializer(serializers.ModelSerializer):
+
+    employee_name = serializers.CharField(
+        source='employee.name',
+        read_only=True
+    )
+
+    department = serializers.CharField(
+        source='employee.department.name',
+        read_only=True
+    )
+
+    leave_type = serializers.CharField(
+        source='leave_type.name',
+        read_only=True
+    )
+
+    remaining_days = serializers.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        read_only=True
+    )
+
+    class Meta:
+
+        model = LeaveBalance
+
+        fields = [
+            'id',
+            'employee_name',
+            'department',
+            'leave_type',
+            'total_days',
+            'used_days',
+            'remaining_days'
+        ]            

@@ -8,7 +8,10 @@ from .views import (
     ManagerPendingLeavesView,
     ApproveLeaveView,
     RejectLeaveView,
-    HRDashboardView
+    HRDashboardView,
+    HRLeaveReportView,
+    HRLeaveBalanceReportView,
+    ExportLeaveReportCSVView
 )
 urlpatterns = [
     path(
@@ -57,5 +60,23 @@ urlpatterns = [
         'hr/dashboard/',
         HRDashboardView.as_view(),
         name='hr-dashboard'
+    ),
+
+    path(
+        'hr/leave-report/',
+        HRLeaveReportView.as_view(),
+        name='hr-leave-report'
+    ),
+
+    path(
+        'hr/balances/',
+        HRLeaveBalanceReportView.as_view(),
+        name='hr-balance-report'
+    ),
+
+    path(
+        'hr/export-csv/',
+        ExportLeaveReportCSVView.as_view(),
+        name='export-csv'
     ),
 ]
