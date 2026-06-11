@@ -22,7 +22,7 @@ class LeaveBalanceSerializer(serializers.ModelSerializer):
             'remaining_days'
         ]
 
-class LeaveRequestSerializer(serializers.ModelSerializer):
+""" class LeaveRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
 
@@ -71,6 +71,80 @@ class LeaveRequestSerializer(serializers.ModelSerializer):
 
             raise serializers.ValidationError(
                 "You cannot assign yourself as proxy employee."
+            )
+
+        if (
+            data.get('is_half_day')
+            and start_date != end_date
+        ):
+
+            raise serializers.ValidationError(
+                "Half-day leave can only be applied for a single day."
+            )
+
+        return data """
+
+class LeaveRequestSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = LeaveRequest
+
+        fields = [
+            'id',
+            'leave_type',
+            'start_date',
+            'end_date',
+            'reason',
+            'is_half_day',
+            'proxy_employee',
+            'total_days',
+            'status',
+            'created_at'
+        ]
+
+        read_only_fields = [
+            'total_days',
+            'status',
+            'created_at'
+        ]
+
+    def validate(self, data):
+
+        start_date = data['start_date']
+        end_date = data['end_date']
+        proxy_employee = data['proxy_employee']
+
+        if start_date < timezone.now().date():
+
+            raise serializers.ValidationError(
+                "Start date cannot be in the past."
+            )
+
+        if end_date < start_date:
+
+            raise serializers.ValidationError(
+                "End date cannot be before start date."
+            )
+
+        request_user = self.context['request'].user
+
+        if proxy_employee == request_user:
+
+            raise serializers.ValidationError(
+                "You cannot assign yourself as proxy employee."
+            )
+
+        if proxy_employee.role != 'employee':
+
+            raise serializers.ValidationError(
+                "Proxy employee must have employee role."
+            )
+
+        if proxy_employee.department != request_user.department:
+
+            raise serializers.ValidationError(
+                "Proxy employee must belong to your department."
             )
 
         if (
