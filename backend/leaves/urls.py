@@ -1,6 +1,9 @@
 from django.urls import path
 
 from .views import (
+    LeaveTypeListCreateView,
+    PublicHolidayListCreateView,
+    PublicHolidayDeleteView,
     LeaveBalanceView,
     ApplyLeaveView,
     MyLeavesView,
@@ -8,36 +11,59 @@ from .views import (
     ManagerPendingLeavesView,
     ApproveLeaveView,
     RejectLeaveView,
-    HRDashboardView,
-    HRLeaveReportView,
-    HRLeaveBalanceReportView,
-    ExportLeaveReportCSVView
+    DelegateApproverView,
 )
+
 urlpatterns = [
+    # Leave types (#10)
+    path(
+        'leave-types/',
+        LeaveTypeListCreateView.as_view(),
+        name='leave-type-list-create'
+    ),
+
+    # Public holidays (#11)
+    path(
+        'holidays/',
+        PublicHolidayListCreateView.as_view(),
+        name='holiday-list-create'
+    ),
+
+    path(
+        'holidays/<int:pk>/delete/',
+        PublicHolidayDeleteView.as_view(),
+        name='holiday-delete'
+    ),
+
+    # Balances
     path(
         'balances/',
         LeaveBalanceView.as_view(),
         name='leave-balances'
     ),
 
+    # Apply leave
     path(
         'apply/',
         ApplyLeaveView.as_view(),
         name='apply-leave'
     ),
 
+    # My leaves
     path(
         'my-leaves/',
         MyLeavesView.as_view(),
         name='my-leaves'
     ),
 
+    # Cancel
     path(
         '<int:leave_id>/cancel/',
         CancelLeaveView.as_view(),
         name='cancel-leave'
     ),
 
+    # Manager
     path(
         'pending-requests/',
         ManagerPendingLeavesView.as_view(),
@@ -56,27 +82,16 @@ urlpatterns = [
         name='reject-leave'
     ),
 
+    # Delegate (#12)
     path(
-        'hr/dashboard/',
-        HRDashboardView.as_view(),
-        name='hr-dashboard'
+        'delegate/',
+        DelegateApproverView.as_view(),
+        name='delegate-list-create'
     ),
 
     path(
-        'hr/leave-report/',
-        HRLeaveReportView.as_view(),
-        name='hr-leave-report'
-    ),
-
-    path(
-        'hr/balances/',
-        HRLeaveBalanceReportView.as_view(),
-        name='hr-balance-report'
-    ),
-
-    path(
-        'hr/export-csv/',
-        ExportLeaveReportCSVView.as_view(),
-        name='export-csv'
+        'delegate/<int:pk>/delete/',
+        DelegateApproverView.as_view(),
+        name='delegate-delete'
     ),
 ]

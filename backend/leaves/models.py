@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 from accounts.models import User
 
 
@@ -12,6 +11,10 @@ class LeaveType(models.Model):
     )
 
     annual_quota = models.PositiveIntegerField()
+
+    is_active = models.BooleanField(
+        default=True
+    )
 
     created_at = models.DateTimeField(
         auto_now_add=True
@@ -64,7 +67,8 @@ class LeaveBalance(models.Model):
 
     def __str__(self):
         return f"{self.employee.name} - {self.leave_type.name}"
-    
+
+
 class LeaveRequest(models.Model):
 
     STATUS_CHOICES = (
@@ -147,8 +151,9 @@ class LeaveRequest(models.Model):
             f"{self.employee.name} | "
             f"{self.leave_type.name} | "
             f"{self.status}"
-        )    
-    
+        )
+
+
 class PublicHoliday(models.Model):
 
     name = models.CharField(
@@ -159,9 +164,66 @@ class PublicHoliday(models.Model):
         unique=True
     )
 
+    year = models.PositiveIntegerField(
+        editable=False
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True
     )
 
+    def save(self, *args, **kwargs):
+        if isinstance(self.date, str):
+            from datetime import date as dt_date
+            self.date = dt_date.fromisoformat(self.date)
+        self.year = self.date.year
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.name} - {self.date}"    
+        return f"{self.name} - {self.date}"
+
+
+class DelegateApprover(models.Model):
+    """
+    When a manager goes on leave, they assign a delegate
+    who can approve/reject leave requests on their behalf.
+    """
+
+    manager = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='delegated_from'
+    )
+
+    delegate = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='delegated_to'
+    )
+
+    start_date = models.DateField()
+
+    end_date = models.DateField()
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['manager', 'start_date', 'end_date'],
+                name='unique_delegation_period'
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.manager.name} -> "
+            f"{self.delegate.name} "
+            f"({self.start_date} to {self.end_date})"
+        )

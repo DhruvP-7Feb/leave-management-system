@@ -1,8 +1,10 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     LoginView,
+    LogoutView,
     ProfileView,
-    HRDashboardView,
+    EmployeeListView,
     EmployeeCreateView,
     DeactivateEmployeeView,
     ReactivateEmployeeView
@@ -16,19 +18,31 @@ urlpatterns = [
     ),
 
     path(
+        'logout/',
+        LogoutView.as_view(),
+        name='logout'
+    ),
+
+    path(
+        'token/refresh/',
+        TokenRefreshView.as_view(),
+        name='token-refresh'
+    ),
+
+    path(
         'profile/',
         ProfileView.as_view(),
         name='profile'
     ),
 
     path(
-        'hr-dashboard/',
-        HRDashboardView.as_view(),
-        name='hr-dashboard'
+        'employees/',
+        EmployeeListView.as_view(),
+        name='employee-list'
     ),
 
     path(
-        'employees/',
+        'employees/create/',
         EmployeeCreateView.as_view(),
         name='employee-create'
     ),

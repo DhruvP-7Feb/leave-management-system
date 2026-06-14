@@ -4,7 +4,8 @@ from .models import (
     LeaveType,
     LeaveBalance,
     LeaveRequest,
-    PublicHoliday
+    PublicHoliday,
+    DelegateApprover,
 )
 
 
@@ -14,7 +15,8 @@ class LeaveTypeAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'annual_quota'
+        'annual_quota',
+        'is_active'
     )
 
 
@@ -65,5 +67,23 @@ class PublicHolidayAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'date'
+        'date',
+        'year'
+    )
+
+
+@admin.register(DelegateApprover)
+class DelegateApproverAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'id',
+        'manager',
+        'delegate',
+        'start_date',
+        'end_date',
+        'is_active',
+    )
+
+    list_filter = (
+        'is_active',
     )

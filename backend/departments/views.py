@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +5,51 @@ from rest_framework import status
 from accounts.permissions import IsHRAdmin
 
 from .models import Department
-from .serializers import AssignManagerSerializer
+from .serializers import (
+    DepartmentSerializer,
+    AssignManagerSerializer,
+)
+
+
+class DepartmentListCreateView(APIView):
+
+    permission_classes = [IsHRAdmin]
+
+    def get(self, request):
+
+        departments = Department.objects.select_related(
+            'manager'
+        ).all().order_by('id')
+
+        serializer = DepartmentSerializer(
+            departments,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def post(self, request):
+
+        serializer = DepartmentSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class AssignManagerView(APIView):
@@ -34,18 +75,6 @@ class AssignManagerView(APIView):
                     "error": "Department not found"
                 },
                 status=status.HTTP_404_NOT_FOUND
-            )
-
-        if department.manager:
-
-            return Response(
-                {
-                    "error": (
-                        "Department already has "
-                        "a manager assigned."
-                    )
-                },
-                status=status.HTTP_400_BAD_REQUEST
             )
 
         serializer = AssignManagerSerializer(

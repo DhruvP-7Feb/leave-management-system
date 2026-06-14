@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.contrib.auth import authenticate
 
 from rest_framework.views import APIView
@@ -6,20 +5,23 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import (
     LoginSerializer,
     ProfileSerializer,
-    EmployeeCreateSerializer
+    EmployeeCreateSerializer,
+    EmployeeListSerializer,
 )
 
 from .permissions import IsHRAdmin
 from .models import User
 from leaves.models import LeaveType, LeaveBalance
 import math
-# Create your views here.
+
+
 class LoginView(APIView):
 
     def post(self, request):
@@ -35,12 +37,13 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        username = serializer.validated_data['username']
+        email = serializer.validated_data['email']
 
         password = serializer.validated_data['password']
 
         user = authenticate(
-            username=username,
+            request,
+            email=email,
             password=password
         )
 
@@ -48,9 +51,18 @@ class LoginView(APIView):
 
             return Response(
                 {
-                    "error": "Invalid username or password."
+                    "error": "Invalid email or password."
                 },
                 status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if not user.is_active:
+
+            return Response(
+                {
+                    "error": "This account has been deactivated."
+                },
+                status=status.HTTP_403_FORBIDDEN
             )
 
         refresh = RefreshToken.for_user(user)
@@ -64,7 +76,46 @@ class LoginView(APIView):
             },
             status=status.HTTP_200_OK
         )
-    
+
+
+class LogoutView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        try:
+
+            refresh_token = request.data.get('refresh')
+
+            if not refresh_token:
+                return Response(
+                    {
+                        'error': 'Refresh token is required.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(
+                {
+                    'message': 'Logged out successfully.'
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except TokenError:
+
+            return Response(
+                {
+                    'error': 'Invalid or expired token.'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
 class ProfileView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -80,18 +131,27 @@ class ProfileView(APIView):
             status=status.HTTP_200_OK
         )
 
-class HRDashboardView(APIView):
+
+class EmployeeListView(APIView):
 
     permission_classes = [IsHRAdmin]
 
     def get(self, request):
 
+        employees = User.objects.select_related(
+            'department'
+        ).all().order_by('id')
+
+        serializer = EmployeeListSerializer(
+            employees,
+            many=True
+        )
+
         return Response(
-            {
-                'message': 'Welcome HR Admin'
-            },
+            serializer.data,
             status=status.HTTP_200_OK
         )
+
 
 class EmployeeCreateView(APIView):
 
@@ -110,7 +170,9 @@ class EmployeeCreateView(APIView):
 
             remaining_months = 12 - joining_month + 1
 
-            leave_types = LeaveType.objects.all()
+            leave_types = LeaveType.objects.filter(
+                is_active=True
+            )
             for leave_type in leave_types:
 
                 prorated_days = math.ceil(
@@ -132,8 +194,9 @@ class EmployeeCreateView(APIView):
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
-        )    
-    
+        )
+
+
 class DeactivateEmployeeView(APIView):
 
     permission_classes = [IsHRAdmin]
@@ -164,8 +227,9 @@ class DeactivateEmployeeView(APIView):
                 'message': 'Employee deactivated successfully'
             },
             status=status.HTTP_200_OK
-        )    
-    
+        )
+
+
 class ReactivateEmployeeView(APIView):
 
     permission_classes = [IsHRAdmin]
@@ -205,4 +269,4 @@ class ReactivateEmployeeView(APIView):
                 'message': 'Employee reactivated successfully'
             },
             status=status.HTTP_200_OK
-        )    
+        )

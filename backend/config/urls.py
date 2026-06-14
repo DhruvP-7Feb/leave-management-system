@@ -36,7 +36,7 @@ urlpatterns = [
     ),
 
     path(
-        'api/leaves/',
-        include('leaves.urls')
+        'api/reports/',
+        include('reports.urls')
     ),
 ]

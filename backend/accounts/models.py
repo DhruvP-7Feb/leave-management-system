@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
+from datetime import date
 
 
 class User(AbstractUser):
@@ -30,10 +30,13 @@ class User(AbstractUser):
     )
 
     joining_date = models.DateField(
-        default=timezone.now
+        default=date.today
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'name']
 
     def __str__(self):
         return self.name
