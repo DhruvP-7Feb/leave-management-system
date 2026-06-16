@@ -7,7 +7,8 @@ from .views import (
     EmployeeListView,
     EmployeeCreateView,
     DeactivateEmployeeView,
-    ReactivateEmployeeView
+    ReactivateEmployeeView,
+    PublicEmployeeListView
 )
 
 urlpatterns = [
@@ -15,6 +16,12 @@ urlpatterns = [
         'login/',
         LoginView.as_view(),
         name='login'
+    ),
+
+    path(
+        'employees/public/',
+        PublicEmployeeListView.as_view(),
+        name='employee-public-list'
     ),
 
     path(

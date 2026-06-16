@@ -132,6 +132,17 @@ class ProfileView(APIView):
         )
 
 
+
+class PublicEmployeeListView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        employees = User.objects.filter(is_active=True).order_by('name')
+        data = [{'id': emp.id, 'name': emp.name, 'email': emp.email} for emp in employees]
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class EmployeeListView(APIView):
 
     permission_classes = [IsHRAdmin]

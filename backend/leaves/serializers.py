@@ -141,6 +141,7 @@ class LeaveRequestListSerializer(serializers.ModelSerializer):
             'start_date',
             'end_date',
             'total_days',
+            'reason',
             'status',
             'rejection_reason',
             'created_at'
@@ -225,6 +226,7 @@ class HRLeaveRequestSerializer(serializers.ModelSerializer):
             'total_days',
             'status',
             'approved_by',
+            'reason',
             'rejection_reason',
             'created_at'
         ]
