@@ -12,7 +12,8 @@ import {
   BarChart3,
   FileText,
   LogOut,
-  X
+  X,
+  UserPlus
 } from 'lucide-react';
 
 const RoleBadge = ({ role }) => {
@@ -38,12 +39,14 @@ const NAV_ITEMS = {
     { path: '/manager/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/manager/my-leaves', icon: Calendar, label: 'My Leaves' },
     { path: '/manager/approvals', icon: ClipboardList, label: 'Approvals', badgeKey: 'approvals' },
+    { path: '/manager/delegations', icon: UserPlus, label: 'Delegate' },
     { path: '/manager/holidays', icon: FileText, label: 'Holidays' },
   ],
   hr_admin: [
     { path: '/hr/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/hr/employees', icon: Users, label: 'Employees' },
     { path: '/hr/departments', icon: Building2, label: 'Departments' },
+    { path: '/hr/approvals', icon: ClipboardList, label: 'Approvals', badgeKey: 'approvals' },
     { path: '/hr/leave-reports', icon: BarChart3, label: 'Leave Reports' },
     { path: '/hr/balances', icon: BarChart3, label: 'Employee Balances' },
     { path: '/hr/holidays', icon: FileText, label: 'Holidays' },
@@ -59,7 +62,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navItems = NAV_ITEMS[role] || NAV_ITEMS.employee;
 
   useEffect(() => {
-    if (role === 'manager') {
+    if (role === 'manager' || role === 'hr_admin') {
       getPendingRequests()
         .then((data) => setPendingCount(data.length))
         .catch(() => {});

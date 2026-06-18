@@ -10,6 +10,7 @@ import MyLeaves from './pages/employee/MyLeaves';
 import ApplyLeave from './pages/employee/ApplyLeave';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 import PendingRequests from './pages/manager/PendingRequests';
+import Delegations from './pages/manager/Delegations';
 import HRDashboard from './pages/hr/HRDashboard';
 import LeaveReports from './pages/hr/LeaveReports';
 import EmployeeBalances from './pages/hr/EmployeeBalances';
@@ -51,6 +52,7 @@ function App() {
               <Route path="/manager/dashboard" element={<ManagerDashboard />} />
               <Route path="/manager/my-leaves" element={<MyLeaves />} />
               <Route path="/manager/approvals" element={<PendingRequests />} />
+              <Route path="/manager/delegations" element={<Delegations />} />
               <Route path="/manager/holidays" element={<Holidays />} />
             </Route>
 
@@ -65,6 +67,7 @@ function App() {
               <Route path="/hr/dashboard" element={<HRDashboard />} />
               <Route path="/hr/employees" element={<Employees />} />
               <Route path="/hr/departments" element={<Departments />} />
+              <Route path="/hr/approvals" element={<PendingRequests />} />
               <Route path="/hr/leave-reports" element={<LeaveReports />} />
               <Route path="/hr/balances" element={<EmployeeBalances />} />
               <Route path="/hr/holidays" element={<Holidays />} />

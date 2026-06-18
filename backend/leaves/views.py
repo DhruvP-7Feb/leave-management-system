@@ -427,7 +427,7 @@ class ManagerPendingLeavesView(APIView):
             managed_dept_requests = LeaveRequest.objects.filter(
                 employee__department__manager=request.user,
                 status='pending'
-            )
+            ).exclude(employee=request.user)
 
             # Delegated requests
             active_delegations = DelegateApprover.objects.filter(
@@ -440,7 +440,7 @@ class ManagerPendingLeavesView(APIView):
             delegated_requests = LeaveRequest.objects.filter(
                 employee__department__manager__in=active_delegations,
                 status='pending'
-            )
+            ).exclude(employee=request.user)
 
             pending_requests = (
                 managed_dept_requests | delegated_requests
