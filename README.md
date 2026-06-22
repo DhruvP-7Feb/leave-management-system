@@ -20,7 +20,7 @@ A full-stack web application designed to streamline the leave request and approv
 
 - **Frontend**: React (Vite), Tailwind CSS, React Router, Recharts, Lucide Icons, Axios.
 - **Backend**: Python, Django, Django REST Framework, SimpleJWT for Authentication.
-- **Database**: SQLite (Development)
+- **Database**: PostgreSQL
 
 ## 🏃‍♂️ Running Locally
 
