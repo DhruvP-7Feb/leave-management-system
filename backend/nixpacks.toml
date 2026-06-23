@@ -1,2 +1,5 @@
 [phases.setup]
-nixPkgs = ["python314"]
+nixPkgs = ["python3"]
+
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.14"
