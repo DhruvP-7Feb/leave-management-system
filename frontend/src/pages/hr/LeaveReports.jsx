@@ -290,10 +290,10 @@ const LeaveReports = () => {
                           <span className="text-slate-300 italic">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-slate-500 max-w-[150px] truncate" title={leave.reason}>
+                      <td className="px-6 py-4 text-slate-500 min-w-[150px] max-w-xs whitespace-normal break-words" title={leave.reason}>
                         {leave.reason || <span className="text-slate-300 italic">—</span>}
                       </td>
-                      <td className="px-6 py-4 text-red-500 font-medium max-w-[150px] truncate" title={leave.rejection_reason}>
+                      <td className="px-6 py-4 text-red-500 font-medium min-w-[150px] max-w-xs whitespace-normal break-words" title={leave.rejection_reason}>
                         {leave.rejection_reason || <span className="text-slate-300 italic">—</span>}
                       </td>
                     </tr>
