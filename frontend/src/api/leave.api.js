@@ -20,6 +20,11 @@ export const getPendingRequests = async () => {
   return response.data;
 };
 
+export const getManagerStats = async () => {
+  const response = await api.get('/api/leaves/manager-stats/');
+  return response.data;
+};
+
 export const approveLeave = async (id) => {
   const response = await api.post(`/api/leaves/${id}/approve/`);
   return response.data;

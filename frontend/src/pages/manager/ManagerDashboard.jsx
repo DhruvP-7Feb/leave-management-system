@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/UI/Toast';
-import { getPendingRequests, approveLeave, rejectLeave } from '../../api/leave.api';
+import { getPendingRequests, approveLeave, rejectLeave, getManagerStats } from '../../api/leave.api';
 import { getPublicEmployees } from '../../api/auth.api';
 import StatCard from '../../components/UI/StatCard';
 import StatusBadge from '../../components/UI/StatusBadge';
@@ -31,6 +31,8 @@ const ManagerDashboard = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [employeesCount, setEmployeesCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
 
   // Modal / Dialog states
   const [confirmApproveId, setConfirmApproveId] = useState(null);
@@ -39,12 +41,15 @@ const ManagerDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [pending, emps] = await Promise.all([
+      const [pending, emps, stats] = await Promise.all([
         getPendingRequests(),
         getPublicEmployees(),
+        getManagerStats(),
       ]);
       setPendingRequests(pending || []);
       setEmployeesCount(emps ? emps.length : 0);
+      setApprovedCount(stats?.approved_this_month || 0);
+      setRejectedCount(stats?.rejected_this_month || 0);
     } catch (error) {
       toast.error('Failed to load dashboard data');
     } finally {
@@ -162,7 +167,7 @@ const ManagerDashboard = () => {
 
         <StatCard 
           label="Approved Requests" 
-          value="18" 
+          value={approvedCount} 
           icon={CheckCircle2} 
           colorAccent="text-emerald-600 bg-emerald-50" 
           trend="This calendar month"
@@ -170,7 +175,7 @@ const ManagerDashboard = () => {
 
         <StatCard 
           label="Rejected Requests" 
-          value="2" 
+          value={rejectedCount} 
           icon={XCircle} 
           colorAccent="text-red-600 bg-red-50" 
           trend="This calendar month"

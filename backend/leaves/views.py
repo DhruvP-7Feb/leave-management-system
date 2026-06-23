@@ -455,6 +455,44 @@ class ManagerPendingLeavesView(APIView):
 
 
 # ──────────────────────────────────────────────
+# Manager Dashboard Stats
+# ──────────────────────────────────────────────
+
+class ManagerDashboardStatsView(APIView):
+
+    permission_classes = [IsManagerOrHRAdmin]
+
+    def get(self, request):
+
+        today = timezone.now().date()
+        first_day_of_month = today.replace(day=1)
+
+        if request.user.role == 'hr_admin':
+            base_qs = LeaveRequest.objects.all()
+        else:
+            base_qs = LeaveRequest.objects.filter(
+                employee__department__manager=request.user
+            ).exclude(employee=request.user)
+
+        approved_count = base_qs.filter(
+            status='approved',
+            actioned_at__date__gte=first_day_of_month,
+            actioned_at__date__lte=today,
+        ).count()
+
+        rejected_count = base_qs.filter(
+            status='rejected',
+            actioned_at__date__gte=first_day_of_month,
+            actioned_at__date__lte=today,
+        ).count()
+
+        return Response({
+            'approved_this_month': approved_count,
+            'rejected_this_month': rejected_count,
+        })
+
+
+# ──────────────────────────────────────────────
 # Approve Leave  (#1 self-approval blocked)
 # ──────────────────────────────────────────────
 

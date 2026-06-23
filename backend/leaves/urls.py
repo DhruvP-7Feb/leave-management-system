@@ -9,6 +9,7 @@ from .views import (
     MyLeavesView,
     CancelLeaveView,
     ManagerPendingLeavesView,
+    ManagerDashboardStatsView,
     ApproveLeaveView,
     RejectLeaveView,
     DelegateApproverView,
@@ -68,6 +69,12 @@ urlpatterns = [
         'pending-requests/',
         ManagerPendingLeavesView.as_view(),
         name='pending-requests'
+    ),
+
+    path(
+        'manager-stats/',
+        ManagerDashboardStatsView.as_view(),
+        name='manager-stats'
     ),
 
     path(
