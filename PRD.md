@@ -8,7 +8,7 @@
 | **Stack**     | Django (Backend) + React / Vite (Frontend)   |
 | **Database**  | PostgreSQL                                   |
 | **Auth**      | JWT (JSON Web Tokens)                        |
-| **Deliverable** | Working, deployed web application          |
+| **Deliverable** | Working, deployed web application (Vercel Frontend + Railway Backend) |
 
 ---
 
@@ -271,12 +271,15 @@ leave-management-system/
 │   ├── config/            # Django settings, URLs, WSGI
 │   ├── manage.py
 │   ├── requirements.txt
+│   ├── Procfile           # Railway deployment process
+│   ├── build.sh           # Railway build script
 │   └── .env
 ├── frontend/
 │   ├── src/               # React components, pages, services
 │   ├── public/
 │   ├── index.html
 │   ├── vite.config.js
+│   ├── vercel.json        # Vercel deployment routing
 │   └── package.json
 └── PRD.md
 ```
@@ -441,49 +444,49 @@ leave-management-system/
 ## 9. Acceptance Criteria
 
 ### Module 1 — User Accounts & Authentication
-- [ ] HR Admin can create an employee account with email, name, role, department, joining date
-- [ ] HR Admin can deactivate an employee account (user can no longer log in)
-- [ ] HR Admin can create departments and assign a manager to each
-- [ ] Users can log in with email and password and receive a JWT
-- [ ] Each role is redirected to a role-appropriate dashboard after login
-- [ ] Logged-out users are redirected to the login page when accessing protected routes
+- [x] HR Admin can create an employee account with email, name, role, department, joining date
+- [x] HR Admin can deactivate an employee account (user can no longer log in)
+- [x] HR Admin can create departments and assign a manager to each
+- [x] Users can log in with email and password and receive a JWT
+- [x] Each role is redirected to a role-appropriate dashboard after login
+- [x] Logged-out users are redirected to the login page when accessing protected routes
 
 ### Module 2 — Leave Types & Balances
-- [ ] HR Admin can create a leave type with a name and annual quota
-- [ ] When a new employee is created, balances for all leave types are auto-created
-- [ ] Mid-year joiners receive pro-rated balances based on joining month
-- [ ] Employees can view their balance (allocated, used, remaining) on the dashboard
+- [x] HR Admin can create a leave type with a name and annual quota
+- [x] When a new employee is created, balances for all leave types are auto-created
+- [x] Mid-year joiners receive pro-rated balances based on joining month
+- [x] Employees can view their balance (allocated, used, remaining) on the dashboard
 
 ### Module 3 — Apply & Manage Leave
-- [ ] Employee can submit a leave application with type, dates, reason, half-day option, and handover person
-- [ ] System calculates working days (Mon–Fri, excluding public holidays)
-- [ ] System rejects: past dates, insufficient balance, overlapping approved leaves
-- [ ] Leave request is created in **Pending** status
-- [ ] Employee can cancel a Pending request
-- [ ] Employee can cancel an Approved request and balance is restored
-- [ ] Employee can view their leave history with statuses
+- [x] Employee can submit a leave application with type, dates, reason, half-day option, and handover person
+- [x] System calculates working days (Mon–Fri, excluding public holidays)
+- [x] System rejects: past dates, insufficient balance, overlapping approved leaves
+- [x] Leave request is created in **Pending** status
+- [x] Employee can cancel a Pending request
+- [x] Employee can cancel an Approved request and balance is restored
+- [x] Employee can view their leave history with statuses
 
 ### Module 4 — Manager Approval
-- [ ] Manager sees all Pending requests from their direct team
-- [ ] Manager can approve a request → status becomes Approved, balance deducted
-- [ ] Manager can reject a request with a mandatory reason → status becomes Rejected
-- [ ] Employee sees updated status and rejection reason immediately
-- [ ] Manager's own leave request is routed to HR Admin
-- [ ] Manager can assign a delegate for approvals when going on leave
+- [x] Manager sees all Pending requests from their direct team
+- [x] Manager can approve a request → status becomes Approved, balance deducted
+- [x] Manager can reject a request with a mandatory reason → status becomes Rejected
+- [x] Employee sees updated status and rejection reason immediately
+- [x] Manager's own leave request is routed to HR Admin
+- [x] Manager can assign a delegate for approvals when going on leave
 
 ### Module 5 — HR Dashboard & Reports
-- [ ] HR dashboard shows: total leaves this month, pending approvals, upcoming leaves this week
-- [ ] HR can view all leave requests with filters (employee, department, date range, status)
-- [ ] HR can view all employee balances (used + remaining per person per leave type)
-- [ ] HR can export the filtered leave list as a CSV file
+- [x] HR dashboard shows: total leaves this month, pending approvals, upcoming leaves this week
+- [x] HR can view all leave requests with filters (employee, department, date range, status)
+- [x] HR can view all employee balances (used + remaining per person per leave type)
+- [x] HR can export the filtered leave list as a CSV file
 
 ### Cross-Cutting
-- [ ] All forms validate on both client and server side
-- [ ] All API endpoints enforce role-based permissions
-- [ ] Clear, user-friendly error messages for every failure case
-- [ ] Loading and empty states handled gracefully
-- [ ] No hardcoded secrets in source code
-- [ ] Clean Git commit history with meaningful messages
+- [x] All forms validate on both client and server side
+- [x] All API endpoints enforce role-based permissions
+- [x] Clear, user-friendly error messages for every failure case
+- [x] Loading and empty states handled gracefully
+- [x] No hardcoded secrets in source code
+- [x] Clean Git commit history with meaningful messages
 
 ---
 
@@ -513,8 +516,8 @@ leave-management-system/
 
 ## 11. Final Deliverable Checklist
 
-- [ ] Deployed web application accessible via a URL
-- [ ] All three roles working — Employee, Manager, HR Admin
-- [ ] All 5 modules functional end-to-end
-- [ ] Git repository with clean commit history
-- [ ] Demo flow: Apply leave → Manager approves → Balance updates
+- [x] Deployed web application accessible via a URL (Vercel & Railway)
+- [x] All three roles working — Employee, Manager, HR Admin
+- [x] All 5 modules functional end-to-end
+- [x] Git repository with clean commit history
+- [x] Demo flow: Apply leave → Manager approves → Balance updates
