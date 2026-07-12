@@ -10,7 +10,7 @@
         <mxCell id="1" parent="0"/>
 <mxCell id="11" value="Employee Leave Management System  |  Full Architecture  |  Django 4.2 + React 18 + PostgreSQL 15" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B2A3B;strokeColor=#1B2A3B;fontStyle=1;fontSize=15;fontColor=#FFFFFF;align=center;verticalAlign=middle;" parent="1" vertex="1"><mxGeometry x="0" y="10" width="1560" height="52" as="geometry"/></mxCell>
 <mxCell id="12" value="REAL-LIFE FLOW: Dhruv (Employee) applies for 3-day Casual Leave  | [1] Browser opens React app  | [2] POST /api/login/ -&gt; JWT access_token issued (15 min)  | [3] ApplyLeaveForm -&gt; POST /api/leave-requests/ + Bearer token  | [4] JWTAuthentication validates token -&gt; LeaveRequestView runs 4 validations  | [5] Django saves LeaveRequest(status=pending) in PostgreSQL  | [6] Manager Rahul logs in -&gt; PATCH /approve/ -&gt; transaction.atomic() -&gt; used_days += 3  | [7] Dhruv sees Approved, balance 12 -&gt; 9 days" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=9;align=left;verticalAlign=middle;spacingLeft=10;fontColor=#5D4037;" parent="1" vertex="1"><mxGeometry x="0" y="75" width="1560" height="78" as="geometry"/></mxCell>
-<mxCell id="13" value="LAYER 1  --  BROWSER / CLIENT  (Chrome/Firefox  |  HTTP requests to localhost:3000)" style="swimlane;startSize=30;fillColor=#DBEAFE;strokeColor=#1D4ED8;fontStyle=1;fontSize=11;fontColor=#1E3A8A;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="165" width="1560" height="160" as="geometry"/></mxCell>
+<mxCell id="13" value="LAYER 1  --  BROWSER / CLIENT  (Chrome/Firefox  |  HTTP requests to Vercel/Railway)" style="swimlane;startSize=30;fillColor=#DBEAFE;strokeColor=#1D4ED8;fontStyle=1;fontSize=11;fontColor=#1E3A8A;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="165" width="1560" height="160" as="geometry"/></mxCell>
 <mxCell id="14" value="Browser
 (Chrome / Firefox)
 
@@ -38,10 +38,10 @@ Redirects if not authorized" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#
 <mxCell id="18" value="axiosInstance
 (src/api/axios.js)
 
-baseURL: localhost:8000
+baseURL: VITE_API_URL
 request interceptor:
   attach Bearer token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#1D4ED8;fontSize=9;align=center;verticalAlign=top;spacingTop=4;arcSize=10;" parent="13" vertex="1"><mxGeometry x="1244" y="34" width="291" height="112" as="geometry"/></mxCell>
-<mxCell id="19" value="LAYER 2  --  REACT FRONTEND  (localhost:3000  |  src/pages/  +  src/components/)" style="swimlane;startSize=30;fillColor=#DCFCE7;strokeColor=#15803D;fontStyle=1;fontSize=11;fontColor=#14532D;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="335" width="1560" height="160" as="geometry"/></mxCell>
+<mxCell id="19" value="LAYER 2  --  REACT FRONTEND  (Vercel Deployment  |  src/pages/  +  src/components/)" style="swimlane;startSize=30;fillColor=#DCFCE7;strokeColor=#15803D;fontStyle=1;fontSize=11;fontColor=#14532D;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="335" width="1560" height="160" as="geometry"/></mxCell>
 <mxCell id="20" value="LoginPage.jsx
 (src/pages/LoginPage.jsx)
 
@@ -115,7 +115,7 @@ Returns 403 if wrong role" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FE
 Returns current user data
 name, role, department
 Used on app load" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF08A;strokeColor=#CA8A04;fontSize=9;align=center;verticalAlign=top;spacingTop=4;arcSize=10;" parent="26" vertex="1"><mxGeometry x="1294" y="34" width="242" height="128" as="geometry"/></mxCell>
-<mxCell id="33" value="LAYER 4  --  DJANGO BACKEND  (localhost:8000  |  REST Framework ViewSets + Serializers + Signals + Utils)" style="swimlane;startSize=30;fillColor=#F3E8FF;strokeColor=#7E22CE;fontStyle=1;fontSize=11;fontColor=#3B0764;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="690" width="1560" height="190" as="geometry"/></mxCell>
+<mxCell id="33" value="LAYER 4  --  DJANGO BACKEND  (Railway Deployment  |  REST Framework ViewSets + Serializers + Signals + Utils)" style="swimlane;startSize=30;fillColor=#F3E8FF;strokeColor=#7E22CE;fontStyle=1;fontSize=11;fontColor=#3B0764;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="690" width="1560" height="190" as="geometry"/></mxCell>
 <mxCell id="34" value="UserViewSet
 (accounts/views.py)
 
@@ -213,7 +213,7 @@ manager_id  FK-User
 delegate_id  FK-User
 from_date  DateField
 to_date  DateField" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0E7490;fontSize=8;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;" parent="41" vertex="1"><mxGeometry x="1326" y="64" width="207" height="80" as="geometry"/></mxCell>
-<mxCell id="56" value="LAYER 6  --  INFRASTRUCTURE  (.env  |  Git  |  Gunicorn  |  Render / Railway  |  pgAdmin)" style="swimlane;startSize=30;fillColor=#ECFEFF;strokeColor=#0E7490;fontStyle=1;fontSize=11;fontColor=#164E63;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="1215" width="1560" height="160" as="geometry"/></mxCell>
+<mxCell id="56" value="LAYER 6  --  INFRASTRUCTURE  (.env  |  Git  |  Railway (Backend)  |  Vercel (Frontend)  |  pgAdmin)" style="swimlane;startSize=30;fillColor=#ECFEFF;strokeColor=#0E7490;fontStyle=1;fontSize=11;fontColor=#164E63;align=left;horizontal=1;swimlaneLine=1;arcSize=4;" parent="1" vertex="1"><mxGeometry x="0" y="1215" width="1560" height="160" as="geometry"/></mxCell>
 <mxCell id="57" value=".env File
 (root/.env  -- NEVER commit)
 
@@ -226,18 +226,18 @@ DEBUG=False in production" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CF
 Port 5432
 pgAdmin for inspection
 Hosts all 7 tables" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFFAFE;strokeColor=#0E7490;fontSize=9;align=center;verticalAlign=top;spacingTop=4;arcSize=10;" parent="56" vertex="1"><mxGeometry x="329" y="34" width="291" height="112" as="geometry"/></mxCell>
-<mxCell id="59" value="Gunicorn + Nginx
-(Production server)
+<mxCell id="59" value="Railway Platform
+(Backend API)
 
-gunicorn config.wsgi
-Serves Django on port 8000
-Nginx reverse proxy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFFAFE;strokeColor=#0E7490;fontSize=9;align=center;verticalAlign=top;spacingTop=4;arcSize=10;" parent="56" vertex="1"><mxGeometry x="634" y="34" width="291" height="112" as="geometry"/></mxCell>
-<mxCell id="60" value="React Build
-(npm run build)
+Procfile: gunicorn config.wsgi
+Serves Django
+WhiteNoise for static files" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFFAFE;strokeColor=#0E7490;fontSize=9;align=center;verticalAlign=top;spacingTop=4;arcSize=10;" parent="56" vertex="1"><mxGeometry x="634" y="34" width="291" height="112" as="geometry"/></mxCell>
+<mxCell id="60" value="Vercel Platform
+(React Frontend)
 
-Outputs build/ folder
-Served by Nginx as static
-build/index.html entry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFFAFE;strokeColor=#0E7490;fontSize=9;align=center;verticalAlign=top;spacingTop=4;arcSize=10;" parent="56" vertex="1"><mxGeometry x="939" y="34" width="291" height="112" as="geometry"/></mxCell>
+Auto-builds from GitHub
+Global CDN distribution
+vercel.json for rewrites" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFFAFE;strokeColor=#0E7490;fontSize=9;align=center;verticalAlign=top;spacingTop=4;arcSize=10;" parent="56" vertex="1"><mxGeometry x="939" y="34" width="291" height="112" as="geometry"/></mxCell>
 <mxCell id="61" value="Git Repository
 (GitHub)
 
