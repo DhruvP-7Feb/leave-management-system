@@ -1,0 +1,259 @@
+================================================================================
+                    EMPLOYEE LEAVE MANAGEMENT SYSTEM - API ENDPOINTS
+================================================================================
+
+Total Endpoints: 33 REST API Endpoints (+ 1 Django Admin Route)
+Base URL (Local): http://localhost:8000
+Stack: Django REST Framework (Backend) + React Vite (Frontend)
+Authentication: JWT (JSON Web Tokens) & Google OAuth 2.0 Single Sign-On
+
+================================================================================
+1. USER ACCOUNTS & AUTHENTICATION MODULE (Base: /api/accounts/)
+================================================================================
+
+1. POST /api/accounts/login/
+   - Description: User authentication & JWT token generation (access + refresh)
+   - Access: Public
+   - Request Body: { "email": "string", "password": "string" }
+   - Response: { "access": "token", "refresh": "token", "role": "string", "name": "string" }
+   - Frontend Caller: login() in frontend/src/api/auth.api.js
+
+2. POST /api/accounts/google/
+   - Description: Google OAuth 2.0 Single Sign-On token verification & JWT token generation
+   - Access: Public
+   - Request Body: { "credential": "string" } (Google ID Token)
+   - Response: { "access": "token", "refresh": "token", "role": "string", "name": "string", "email": "string" }
+   - Frontend Caller: googleLogin() in frontend/src/api/auth.api.js
+
+3. POST /api/accounts/logout/
+   - Description: User logout & JWT refresh token blacklisting
+   - Access: Authenticated
+   - Request Body: { "refresh": "token" }
+   - Frontend Caller: logout() in frontend/src/api/auth.api.js
+
+3. POST /api/accounts/token/refresh/
+   - Description: Refresh expired JWT access token
+   - Access: Public / Authenticated
+   - Request Body: { "refresh": "token" }
+   - Response: { "access": "token" }
+   - Frontend Caller: refreshAccessToken() in frontend/src/api/auth.api.js
+
+4. GET /api/accounts/profile/
+   - Description: Fetch profile details of current logged-in user
+   - Access: Authenticated
+   - Frontend Caller: getProfile() in frontend/src/api/auth.api.js
+
+5. GET /api/accounts/employees/
+   - Description: List all employees with complete details & department info
+   - Access: HR Admin
+   - Frontend Caller: getEmployees() in frontend/src/api/auth.api.js
+
+6. GET /api/accounts/employees/public/
+   - Description: Lightweight active employee list (for handover proxy & delegate selection)
+   - Access: Authenticated
+   - Frontend Caller: getPublicEmployees() in frontend/src/api/auth.api.js
+
+7. POST /api/accounts/employees/create/
+   - Description: Create a new employee account & auto-seed pro-rata leave balances
+   - Access: HR Admin
+   - Request Body: { "email", "name", "password", "role", "department", "joining_date" }
+   - Frontend Caller: createEmployee() in frontend/src/api/auth.api.js
+
+8. PATCH /api/accounts/employees/<int:user_id>/deactivate/
+   - Description: Deactivate an employee account (disables login)
+   - Access: HR Admin
+   - Frontend Caller: deactivateEmployee() in frontend/src/api/auth.api.js
+
+9. PATCH /api/accounts/employees/<int:user_id>/reactivate/
+   - Description: Reactivate a previously deactivated employee account
+   - Access: HR Admin
+   - Frontend Caller: reactivateEmployee() in frontend/src/api/auth.api.js
+
+
+================================================================================
+2. DEPARTMENT MANAGEMENT MODULE (Base: /api/departments/)
+================================================================================
+
+10. GET /api/departments/
+    - Description: List all departments with their assigned manager details
+    - Access: HR Admin
+    - Frontend Caller: getDepartments() in frontend/src/api/auth.api.js
+
+11. POST /api/departments/
+    - Description: Create a new department
+    - Access: HR Admin
+    - Request Body: { "name": "string", "manager": integer_or_null }
+    - Frontend Caller: createDepartment() in frontend/src/api/auth.api.js
+
+12. PATCH /api/departments/<int:department_id>/assign-manager/
+    - Description: Assign or update the manager of a department
+    - Access: HR Admin
+    - Request Body: { "manager": integer_or_null }
+    - Frontend Caller: assignManager() in frontend/src/api/auth.api.js
+
+
+================================================================================
+3. LEAVE TYPES, BALANCES & REQUESTS MODULE (Base: /api/leaves/)
+================================================================================
+
+13. GET /api/leaves/leave-types/
+    - Description: List all active leave types with annual quota allocations
+    - Access: Authenticated
+    - Frontend Caller: getLeaveTypes() in frontend/src/api/leave.api.js
+
+14. POST /api/leaves/leave-types/
+    - Description: Create a new leave type & auto-create balances for all existing employees
+    - Access: HR Admin
+    - Request Body: { "name": "string", "annual_quota": number }
+    - Frontend Caller: createLeaveType() in frontend/src/api/leave.api.js
+
+15. GET /api/leaves/holidays/
+    - Description: List all registered public holidays
+    - Access: Authenticated
+    - Frontend Caller: getHolidays() in frontend/src/api/leave.api.js
+
+16. POST /api/leaves/holidays/
+    - Description: Add a new public holiday (excluded from leave duration calculation)
+    - Access: HR Admin
+    - Request Body: { "name": "string", "date": "YYYY-MM-DD" }
+    - Frontend Caller: addHoliday() in frontend/src/api/leave.api.js
+
+17. DELETE /api/leaves/holidays/<int:pk>/delete/
+    - Description: Delete a public holiday
+    - Access: HR Admin
+    - Frontend Caller: deleteHoliday() in frontend/src/api/leave.api.js
+
+18. GET /api/leaves/balances/
+    - Description: Retrieve current user's leave balances (allocated, used, remaining)
+    - Access: Authenticated
+    - Frontend Caller: getMyBalances() in frontend/src/api/balance.api.js
+
+19. POST /api/leaves/apply/
+    - Description: Submit a new leave application with validation & working day calculation
+    - Access: Employee / Manager
+    - Request Body: { "leave_type": id, "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD", "is_half_day": boolean, "reason": "string", "handover_to": id }
+    - Frontend Caller: applyLeave() in frontend/src/api/leave.api.js
+
+20. GET /api/leaves/my-leaves/
+    - Description: Get leave request history for current user
+    - Access: Authenticated
+    - Frontend Caller: getMyLeaves() in frontend/src/api/leave.api.js
+
+21. POST /api/leaves/<int:leave_id>/cancel/
+    - Description: Cancel a pending or approved leave request (restores balance if approved)
+    - Access: Employee (Owner)
+    - Frontend Caller: cancelLeave() in frontend/src/api/leave.api.js
+
+22. GET /api/leaves/pending-requests/
+    - Description: Get pending leave requests for direct team (or delegated authority)
+    - Access: Manager / HR Admin
+    - Frontend Caller: getPendingRequests() in frontend/src/api/leave.api.js
+
+23. GET /api/leaves/manager-stats/
+    - Description: Manager dashboard summary stats (team size, on leave today, pending approvals)
+    - Access: Manager / HR Admin
+    - Frontend Caller: getManagerStats() in frontend/src/api/leave.api.js
+
+24. POST /api/leaves/<int:leave_id>/approve/
+    - Description: Approve a pending leave request (deducts leave balance)
+    - Access: Manager / HR Admin
+    - Frontend Caller: approveLeave() in frontend/src/api/leave.api.js
+
+25. POST /api/leaves/<int:leave_id>/reject/
+    - Description: Reject a pending leave request with mandatory rejection reason
+    - Access: Manager / HR Admin
+    - Request Body: { "rejection_reason": "string" }
+    - Frontend Caller: rejectLeave() in frontend/src/api/leave.api.js
+
+26. GET /api/leaves/delegate/
+    - Description: List active approval delegations created by the manager
+    - Access: Manager / HR Admin
+    - Frontend Caller: getDelegations() in frontend/src/api/leave.api.js
+
+27. POST /api/leaves/delegate/
+    - Description: Delegate approval authority to another manager/employee during absence
+    - Access: Manager / HR Admin
+    - Request Body: { "delegate_to": id, "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD" }
+    - Frontend Caller: createDelegation() in frontend/src/api/leave.api.js
+
+28. DELETE /api/leaves/delegate/<int:pk>/delete/
+    - Description: Revoke / delete an approval delegation
+    - Access: Manager / HR Admin
+    - Frontend Caller: deleteDelegation() in frontend/src/api/leave.api.js
+
+
+================================================================================
+4. HR REPORTS & ANALYTICS MODULE (Base: /api/reports/)
+================================================================================
+
+29. GET /api/reports/dashboard/
+    - Description: HR Admin summary metrics (total leaves this month, pending approvals, upcoming leaves)
+    - Access: HR Admin
+    - Frontend Caller: getHRDashboardSummary() in frontend/src/api/reports.api.js
+
+30. GET /api/reports/leaves/
+    - Description: Organization-wide filterable leave requests list
+    - Access: HR Admin
+    - Query Parameters: ?employee=<id>&department=<id>&status=<status>&start_date=<date>&end_date=<date>
+    - Frontend Caller: getHRLeaveReport() in frontend/src/api/reports.api.js
+
+31. GET /api/reports/balances/
+    - Description: Overview report of all employees' leave balances
+    - Access: HR Admin
+    - Frontend Caller: getAllBalances() in frontend/src/api/balance.api.js
+
+32. GET /api/reports/leaves/export-csv/
+    - Description: Download filtered leave records as a CSV spreadsheet
+    - Access: HR Admin
+    - Query Parameters: ?employee=<id>&department=<id>&status=<status>&start_date=<date>&end_date=<date>
+    - Frontend Caller: exportLeaveReportCSV() in frontend/src/api/reports.api.js
+
+
+================================================================================
+5. SYSTEM / ADMIN
+================================================================================
+
+33. ALL /admin/
+    - Description: Django Built-in Administration Panel
+    - Access: Superuser / Staff
+
+
+================================================================================
+RAW URL LIST (FOR QUICK REFERENCE & API TESTING)
+================================================================================
+
+POST   /api/accounts/login/
+POST   /api/accounts/logout/
+POST   /api/accounts/token/refresh/
+GET    /api/accounts/profile/
+GET    /api/accounts/employees/
+GET    /api/accounts/employees/public/
+POST   /api/accounts/employees/create/
+PATCH  /api/accounts/employees/<int:user_id>/deactivate/
+PATCH  /api/accounts/employees/<int:user_id>/reactivate/
+
+GET    /api/departments/
+POST   /api/departments/
+PATCH  /api/departments/<int:department_id>/assign-manager/
+
+GET    /api/leaves/leave-types/
+POST   /api/leaves/leave-types/
+GET    /api/leaves/holidays/
+POST   /api/leaves/holidays/
+DELETE /api/leaves/holidays/<int:pk>/delete/
+GET    /api/leaves/balances/
+POST   /api/leaves/apply/
+GET    /api/leaves/my-leaves/
+POST   /api/leaves/<int:leave_id>/cancel/
+GET    /api/leaves/pending-requests/
+GET    /api/leaves/manager-stats/
+POST   /api/leaves/<int:leave_id>/approve/
+POST   /api/leaves/<int:leave_id>/reject/
+GET    /api/leaves/delegate/
+POST   /api/leaves/delegate/
+DELETE /api/leaves/delegate/<int:pk>/delete/
+
+GET    /api/reports/dashboard/
+GET    /api/reports/leaves/
+GET    /api/reports/balances/
+GET    /api/reports/leaves/export-csv/

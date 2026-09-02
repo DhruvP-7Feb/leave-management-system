@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/UI/Toast';
-import { login } from '../../api/auth.api';
+import { login, googleLogin } from '../../api/auth.api';
 import { Calendar, CheckCircle2, AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const LoginPage = () => {
@@ -25,6 +26,19 @@ const LoginPage = () => {
     return errs;
   };
 
+  const handleAuthSuccess = (data, userEmail) => {
+    setAuth(data.access, { name: data.name, role: data.role, email: data.email || userEmail });
+    localStorage.setItem('refresh_token', data.refresh);
+    toast.success(`Welcome back, ${data.name}!`);
+
+    const routes = {
+      employee: '/employee/dashboard',
+      manager: '/manager/dashboard',
+      hr_admin: '/hr/dashboard',
+    };
+    navigate(routes[data.role] || '/employee/dashboard', { replace: true });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
@@ -35,16 +49,7 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const data = await login(email, password);
-      setAuth(data.access, { name: data.name, role: data.role, email });
-      localStorage.setItem('refresh_token', data.refresh);
-      toast.success('Welcome back to LeaveDesk!');
-
-      const routes = {
-        employee: '/employee/dashboard',
-        manager: '/manager/dashboard',
-        hr_admin: '/hr/dashboard',
-      };
-      navigate(routes[data.role] || '/employee/dashboard', { replace: true });
+      handleAuthSuccess(data, email);
     } catch (err) {
       setError(
         err.response?.data?.error ||
@@ -54,6 +59,31 @@ const LoginPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse?.credential) {
+      setError('No credential received from Google.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const data = await googleLogin(credentialResponse.credential);
+      handleAuthSuccess(data, data.email);
+    } catch (err) {
+      setError(
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        'Google authentication failed. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google Sign-In failed or was cancelled. Please try again.');
   };
 
   return (
@@ -124,6 +154,28 @@ const LoginPage = () => {
               </div>
             </div>
           )}
+
+          {/* Google OAuth Single Sign-On */}
+          <div className="mb-6">
+            <div className="w-full flex justify-center [&>div]:w-full">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                shape="rectangular"
+                theme="outline"
+                size="large"
+                text="continue_with"
+                width="100%"
+              />
+            </div>
+            <div className="relative my-6 flex items-center">
+              <div className="grow border-t border-slate-200"></div>
+              <span className="shrink mx-3 text-xs font-medium uppercase tracking-wider text-slate-400">
+                Or continue with password
+              </span>
+              <div className="grow border-t border-slate-200"></div>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email field */}

@@ -6,6 +6,11 @@ export const login = async (email, password) => {
   return response.data;
 };
 
+export const googleLogin = async (credential) => {
+  const response = await api.post('/api/accounts/google/', { credential });
+  return response.data;
+};
+
 export const logout = async (refreshToken) => {
   const response = await api.post('/api/accounts/logout/', { refresh: refreshToken });
   return response.data;

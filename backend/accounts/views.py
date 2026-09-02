@@ -20,6 +20,9 @@ from .permissions import IsHRAdmin
 from .models import User
 from leaves.models import LeaveType, LeaveBalance
 import math
+from django.conf import settings
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
 
 
 class LoginView(APIView):
@@ -76,6 +79,121 @@ class LoginView(APIView):
                 "refresh": str(refresh),
                 "role": user.role,
                 "name": user.name
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class GoogleLoginView(APIView):
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        token = request.data.get('credential') or request.data.get('id_token')
+
+        if not token:
+            return Response(
+                {
+                    "error": "Google ID token (credential) is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        client_id = getattr(settings, 'GOOGLE_CLIENT_ID', '')
+
+        try:
+            id_info = google_id_token.verify_oauth2_token(
+                token,
+                google_requests.Request(),
+                audience=client_id if client_id else None
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "error": f"Invalid Google token: {str(e)}"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        email = id_info.get('email')
+        if not email:
+            return Response(
+                {
+                    "error": "Email not found in Google token."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        email_verified = id_info.get('email_verified', False)
+        if not email_verified:
+            return Response(
+                {
+                    "error": "Google email address is not verified."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        name = id_info.get('name') or id_info.get('given_name') or email.split('@')[0]
+
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            if not user.is_active:
+                return Response(
+                    {
+                        "error": "This account has been deactivated."
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Update name if user didn't have one set
+            if not user.name and name:
+                user.name = name
+                user.save(update_fields=['name'])
+        else:
+            # Auto-provision employee account
+            base_username = email.split('@')[0]
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                name=name,
+                role='employee'
+            )
+            user.set_unusable_password()
+            user.save()
+
+            # Seed prorated leave balances for all active leave types
+            joining_month = user.joining_date.month
+            remaining_months = 12 - joining_month + 1
+            active_leave_types = LeaveType.objects.filter(is_active=True)
+
+            for leave_type in active_leave_types:
+                prorated_days = math.ceil(
+                    leave_type.annual_quota * remaining_months / 12
+                )
+                LeaveBalance.objects.create(
+                    employee=user,
+                    leave_type=leave_type,
+                    total_days=prorated_days
+                )
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "role": user.role,
+                "name": user.name,
+                "email": user.email
             },
             status=status.HTTP_200_OK
         )

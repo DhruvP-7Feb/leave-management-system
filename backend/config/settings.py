@@ -172,3 +172,5 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'accounts.User'
+
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
