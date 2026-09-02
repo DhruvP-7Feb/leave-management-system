@@ -185,6 +185,28 @@ class GoogleLoginView(APIView):
                     total_days=prorated_days
                 )
 
+        # Ensure designated roles & department for testing accounts
+        from departments.models import Department
+        dept, _ = Department.objects.get_or_create(name='Engineering')
+
+        if email == 'dhruvparsana7050@gmail.com':
+            if user.role != 'hr_admin' or user.department != dept:
+                user.role = 'hr_admin'
+                user.department = dept
+                user.save(update_fields=['role', 'department'])
+        elif email == 'dparsana0702@gmail.com':
+            if user.role != 'manager' or user.department != dept:
+                user.role = 'manager'
+                user.department = dept
+                user.save(update_fields=['role', 'department'])
+            if dept.manager != user:
+                dept.manager = user
+                dept.save(update_fields=['manager'])
+        elif email == 'itsdhruvp@gmail.com':
+            if user.department != dept:
+                user.department = dept
+                user.save(update_fields=['department'])
+
         refresh = RefreshToken.for_user(user)
 
         return Response(
